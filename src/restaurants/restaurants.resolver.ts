@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql'
 import { Restaurant } from './entities/restaurants.entity'
 import { CreateRestaurantDto } from './dtos/create-restaurant.dto'
@@ -14,4 +15,3 @@ export class RestaurantsResolver {
         return true
     }
 }
-
