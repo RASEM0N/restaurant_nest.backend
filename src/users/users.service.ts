@@ -3,25 +3,64 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/users.entity'
 import { Repository } from 'typeorm'
 import { CreateAccountInput } from './dtos/create-account.dto'
+import { LoginInput } from './dtos/login.dto'
+
+// отсюда происходит взаимодействие с сервером
+// create, find ...
+
+interface Response {
+    ok: boolean
+    error?: string
+}
+
+interface ResponseLogin extends Response {
+    token?: string
+}
 
 @Injectable()
 export class UsersService {
     constructor(@InjectRepository(User) private readonly users: Repository<User>) {}
 
-    async createAccount({
-        email,
-        password,
-        role,
-    }: CreateAccountInput): Promise<[boolean, string?]> {
+    async createAccount({ email, password, role }: CreateAccountInput): Promise<Response> {
         try {
             const exists = await this.users.findOne({ email })
             if (exists) {
-                return [false, 'There is a user with that email already']
+                return { ok: false, error: 'There is a user with that email already' }
             }
             await this.users.save(this.users.create({ email, password, role }))
-            return [true]
+            return {
+                ok: true,
+            }
         } catch (e) {
-            return [false, "Couldn't create account"]
+            return { ok: false, error: "Couldn't create account" }
+        }
+    }
+
+    async login({ email, password }: LoginInput): Promise<ResponseLogin> {
+        try {
+            const user = await this.users.findOne({ email })
+
+            if (!user) {
+                return {
+                    ok: false,
+                    error: 'User not found',
+                }
+            }
+
+            const passwordCorrect = await user.checkPassword(password)
+
+            if (!passwordCorrect) {
+                return {
+                    ok: false,
+                    error: 'Wrong password',
+                }
+            }
+            return {
+                ok: true,
+                token: 'lalalla',
+            }
+        } catch (error) {
+            return { ok: false, error }
         }
     }
 }
