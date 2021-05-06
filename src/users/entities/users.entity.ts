@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Column, Entity } from 'typeorm'
+import { BeforeInsert, Column, Entity } from 'typeorm'
 import { CoreEntity } from '../../common/entities/core.entity'
 import { Field, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
+import * as bcrypt from 'bcrypt'
+import { InternalServerErrorException } from '@nestjs/common'
 
 enum UserRole {
     Owner,
@@ -26,4 +28,14 @@ export class User extends CoreEntity {
     @Field((type) => UserRole)
     @Column({ type: 'enum', enum: UserRole })
     role: UserRole
+
+    @BeforeInsert()
+    async hashPassword(): Promise<void> {
+        try {
+            this.password = await bcrypt.hash(this.password, 10)
+        } catch (e) {
+            console.log(e)
+            throw new InternalServerErrorException()
+        }
+    }
 }

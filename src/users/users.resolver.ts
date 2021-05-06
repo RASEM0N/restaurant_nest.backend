@@ -6,7 +6,8 @@ import { CreateAccountInput, CreateAccountOutput } from './dtos/create-account.d
 
 @Resolver((of) => User)
 export class UsersResolver {
-    constructor(private readonly usersService: UsersService) {}
+    constructor(private readonly usersService: UsersService) {
+    }
 
     @Query((returns) => Boolean)
     hi(): boolean {
@@ -31,4 +32,7 @@ export class UsersResolver {
             }
         }
     }
+
+
+    @Mutation(returns => Boolean)
 }
