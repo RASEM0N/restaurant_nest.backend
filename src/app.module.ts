@@ -4,10 +4,10 @@ import { GraphQLModule } from '@nestjs/graphql'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ConfigModule } from '@nestjs/config'
 import { UsersModule } from './users/users.module'
-import { CommonModule } from './common/common.module'
 import { User } from './users/entities/users.entity'
 import { JwtModule } from './jwt/jwt.module'
 import { JwtMiddleware } from './jwt/jwt.middleware'
+import { AuthModule } from './auth/auth.module';
 
 @Module({
     imports: [
@@ -50,7 +50,7 @@ import { JwtMiddleware } from './jwt/jwt.middleware'
         }),
         // RestaurantsModule,
         UsersModule,
-        CommonModule,
+        AuthModule,
     ],
     controllers: [],
     providers: [],
