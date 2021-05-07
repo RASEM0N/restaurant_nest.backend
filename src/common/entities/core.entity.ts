@@ -3,7 +3,7 @@ import { CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } fr
 @Entity()
 export class CoreEntity {
     @PrimaryGeneratedColumn()
-    id: string
+    id: number
 
     @CreateDateColumn()
     createdAt: Date

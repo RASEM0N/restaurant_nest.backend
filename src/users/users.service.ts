@@ -6,6 +6,7 @@ import { CreateAccountInput } from './dtos/create-account.dto'
 import { LoginInput } from './dtos/login.dto'
 import * as jwt from 'jsonwebtoken'
 import { ConfigService } from '@nestjs/config'
+import { JwtService } from '../jwt/jwt.service'
 
 // отсюда происходит взаимодействие с сервером
 // create, find ...
@@ -24,6 +25,7 @@ export class UsersService {
     constructor(
         @InjectRepository(User) private readonly users: Repository<User>,
         private readonly config: ConfigService,
+        private readonly jwtService: JwtService,
     ) {}
 
     async createAccount({ email, password, role }: CreateAccountInput): Promise<Response> {
@@ -61,7 +63,7 @@ export class UsersService {
                 }
             }
 
-            const token = jwt.sign({ id: user.id }, this.config.get('SECRET_KEY'))
+            const token = this.jwtService.sign(user.id)
             return {
                 ok: true,
                 token,
