@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql'
+import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql'
 import { User } from './entities/users.entity'
 import { UsersService } from './users.service'
 import { CreateAccountInput, CreateAccountOutput } from './dtos/create-account.dto'
@@ -15,7 +15,13 @@ export class UsersResolver {
     }
 
     @Query((returns) => User)
-    me() {}
+    me(@Context() context) {
+        if (!context) {
+            return
+        } else {
+            return context.user
+        }
+    }
 
     @Mutation((returns) => CreateAccountOutput)
     async createAccount(
