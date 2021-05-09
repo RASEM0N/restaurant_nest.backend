@@ -27,7 +27,7 @@ export class User extends CoreEntity {
     email: string
 
     @Field((type) => String)
-    @Column()
+    @Column({ select: false }) // для сокрытия и шоб пароль по кд не кэшеировался
     @IsString()
     @Length(5, 16)
     password: string
@@ -37,6 +37,10 @@ export class User extends CoreEntity {
     @IsEnum(UserRole)
     role: UserRole
 
+    @Column({ default: false })
+    @Field((type) => Boolean)
+    verified: boolean
+
     /*
         После добавления данных или чего-то еще
         хэшеирует пароль
@@ -44,11 +48,13 @@ export class User extends CoreEntity {
     @BeforeUpdate()
     @BeforeInsert()
     async hashPassword(): Promise<void> {
-        try {
-            this.password = await bcrypt.hash(this.password, 10)
-        } catch (e) {
-            console.log(e)
-            throw new InternalServerErrorException()
+        if (this.password) {
+            try {
+                this.password = await bcrypt.hash(this.password, 10)
+            } catch (e) {
+                console.log(e)
+                throw new InternalServerErrorException()
+            }
         }
     }
 

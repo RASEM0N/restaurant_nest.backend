@@ -7,6 +7,7 @@ import { LoginInput } from './dtos/login.dto'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '../jwt/jwt.service'
 import { EditProfileInput } from './dtos/edit-profile.dto'
+import { Verification } from '../common/entities/verification.entity'
 
 // отсюда происходит взаимодействие с сервером
 // create, find ...
@@ -30,6 +31,7 @@ interface ResponseLogin extends Response {
 export class UsersService {
     constructor(
         @InjectRepository(User) private readonly users: Repository<User>,
+        @InjectRepository(Verification) private readonly verification: Repository<Verification>,
         private readonly config: ConfigService,
         private readonly jwtService: JwtService,
     ) {}
@@ -43,7 +45,12 @@ export class UsersService {
             if (exists) {
                 return { ok: false, error: 'There is a user with that email already' }
             }
-            await this.users.save(this.users.create({ email, password, role }))
+            const user = await this.users.save(this.users.create({ email, password, role }))
+            await this.verification.save(
+                this.verification.create({
+                    user: user,
+                }),
+            )
             return {
                 ok: true,
             }
@@ -57,7 +64,12 @@ export class UsersService {
      */
     async login({ email, password }: LoginInput): Promise<ResponseLogin> {
         try {
-            const user = await this.users.findOne({ email })
+            const user = await this.users.findOne(
+                { email },
+                {
+                    select: ['id', 'password'], // user = { id: ..., password: ....} и все
+                },
+            )
 
             if (!user) {
                 return {
@@ -100,7 +112,15 @@ export class UsersService {
     async editProfile(userId: number, { email, password }: EditProfileInput) {
         const user = await this.users.findOne(userId)
 
-        if (email) user.email = email
+        if (email) {
+            user.email = email
+            user.verified = false
+            await this.verification.save(
+                this.verification.create({
+                    user,
+                }),
+            )
+        }
 
         if (password) user.password = password
 
@@ -108,5 +128,25 @@ export class UsersService {
         // - Поэтому мы не используем, ибо пароль не закэшеируется
         // this.users.update(userId, { email, password })
         return this.users.save(user)
+    }
+
+    async verifyEmail(code: string): Promise<boolean> {
+        try {
+            const verification = await this.verification.findOne(
+                { code },
+                {
+                    relations: ['user'],
+                },
+            )
+
+            if (verification) {
+                verification.user.verified = true
+                await this.users.save(verification.user)
+                return true
+            }
+            ret
+        } catch (error) {
+            return false
+        }
     }
 }
