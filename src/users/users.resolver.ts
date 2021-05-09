@@ -8,6 +8,7 @@ import { AuthGuard } from '../auth/auth.guard'
 import { UseGuards } from '@nestjs/common'
 import { AuthUser } from '../auth/auth-user.decorator'
 import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto'
+import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto'
 
 @Resolver((of) => User)
 export class UsersResolver {
@@ -15,7 +16,8 @@ export class UsersResolver {
 
     /**
      * Тестовый запрос
-     * @access  Public
+     * @access      Public
+     * @type        Query
      */
     @Query((returns) => Boolean)
     hi(): boolean {
@@ -25,6 +27,7 @@ export class UsersResolver {
     /**
      *  Получение данных о себе
      *  @access     Private (токен)
+     *  @type       Query
      */
     @Query((returns) => User)
     @UseGuards(AuthGuard)
@@ -35,6 +38,7 @@ export class UsersResolver {
     /**
      * Получение пользователя по id
      * @access      Private (токен)
+     * @type        Query
      */
     @Query((returns) => UserProfileOutput)
     @UseGuards(AuthGuard)
@@ -43,7 +47,7 @@ export class UsersResolver {
             const user = await this.usersService.userById(userProfileInput.userId)
 
             if (!user) throw Error()
-
+            console.log(user)
             return {
                 ok: true,
                 user,
@@ -58,8 +62,9 @@ export class UsersResolver {
 
     /**
      * Создания пользователя
-     * @access      private
-     * @mutation    таблица user
+     * @access      Public
+     * @mutation    таблица users
+     * @type        Mutation
      */
     @Mutation((returns) => CreateAccountOutput)
     async createAccount(
@@ -82,13 +87,39 @@ export class UsersResolver {
 
     /**
      * Авторизация с получения токена
-     * @access      private
+     * @access      Public
      * @mutation    ничего
+     * @type        Mutation
      */
     @Mutation((returns) => LoginOutput)
     async login(@Args('input') loginInput: LoginInput): Promise<LoginOutput> {
         try {
             return await this.usersService.login(loginInput)
+        } catch (error) {
+            return {
+                ok: false,
+                error,
+            }
+        }
+    }
+
+    /**
+     * Редактируем профиль
+     * @access      Private (токен)
+     * @mutation    таблица users
+     * @type        Mutation
+     */
+    @Mutation((returns) => EditProfileOutput)
+    @UseGuards(AuthGuard)
+    async editProfile(
+        @AuthUser() authUser: User,
+        @Args('input') editProfileInput: EditProfileInput,
+    ): Promise<EditProfileOutput> {
+        try {
+            await this.usersService.editProfile(authUser.id, editProfileInput)
+            return {
+                ok: true,
+            }
         } catch (error) {
             return {
                 ok: false,

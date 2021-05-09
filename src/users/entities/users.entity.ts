@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { BeforeInsert, Column, Entity } from 'typeorm'
+import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm'
 import { CoreEntity } from '../../common/entities/core.entity'
 import { Field, InputType, ObjectType, registerEnumType } from '@nestjs/graphql'
 import * as bcrypt from 'bcrypt'
@@ -37,6 +37,11 @@ export class User extends CoreEntity {
     @IsEnum(UserRole)
     role: UserRole
 
+    /*
+        После добавления данных или чего-то еще
+        хэшеирует пароль
+       */
+    @BeforeUpdate()
     @BeforeInsert()
     async hashPassword(): Promise<void> {
         try {

@@ -14,7 +14,7 @@ export class UserProfileInput {
 
 /**
  * Выходные данные
- * @ObjectType      User entity
+ * @ObjectType      User entity, ok & error
  */
 @ObjectType()
 export class UserProfileOutput extends MutationOutput {
