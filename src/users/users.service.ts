@@ -144,7 +144,7 @@ export class UsersService {
                 await this.users.save(verification.user)
                 return true
             }
-            ret
+            return false
         } catch (error) {
             return false
         }
