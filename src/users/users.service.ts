@@ -15,10 +15,16 @@ interface Response {
     error?: string
 }
 
+/**
+ * Жопа
+ */
 interface ResponseLogin extends Response {
     token?: string
 }
 
+/**
+ * Тут храниться логика в девственном ввиде
+ */
 @Injectable()
 export class UsersService {
     constructor(
@@ -27,6 +33,9 @@ export class UsersService {
         private readonly jwtService: JwtService,
     ) {}
 
+    /**
+     * Создание нового аккаунта (регестрация)
+     */
     async createAccount({ email, password, role }: CreateAccountInput): Promise<Response> {
         try {
             const exists = await this.users.findOne({ email })
@@ -42,6 +51,9 @@ export class UsersService {
         }
     }
 
+    /**
+     * Авторизация
+     */
     async login({ email, password }: LoginInput): Promise<ResponseLogin> {
         try {
             const user = await this.users.findOne({ email })
@@ -72,6 +84,9 @@ export class UsersService {
         }
     }
 
+    /**
+     * Берем пользователя по id
+     */
     async userById(id: number): Promise<User> {
         return this.users.findOne({
             id: id,

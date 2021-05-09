@@ -7,10 +7,13 @@ import { UsersModule } from './users/users.module'
 import { User } from './users/entities/users.entity'
 import { JwtModule } from './jwt/jwt.module'
 import { JwtMiddleware } from './jwt/jwt.middleware'
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './auth/auth.module'
 
 @Module({
     imports: [
+        /*
+            Подключаем config .env файл с валидацией входных данных
+         */
         ConfigModule.forRoot({
             isGlobal: true,
             envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.test',
@@ -27,6 +30,9 @@ import { AuthModule } from './auth/auth.module';
                 SECRET_KEY: Joi.string().required(),
             }),
         }),
+        /*
+            Подключаемся к бд postgres (настройка и т.д.)
+         */
         TypeOrmModule.forRoot({
             type: 'postgres',
             host: process.env.DB_HOST,
@@ -41,6 +47,9 @@ import { AuthModule } from './auth/auth.module';
                 User,
             ],
         }),
+        /*
+            Настраиваем GraphQL с прокидываем request
+         */
         GraphQLModule.forRoot({
             autoSchemaFile: true,
             context: ({ req }) => ({ user: req['user'] }),
@@ -57,6 +66,10 @@ import { AuthModule } from './auth/auth.module';
 })
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
+        /*
+            Подключили JwtMiddleware, которая работает по пути /graphql
+            и для всех запросов: post, get ...
+         */
         consumer.apply(JwtMiddleware).forRoutes({
             path: '/graphql',
             method: RequestMethod.ALL,

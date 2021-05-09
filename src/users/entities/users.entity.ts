@@ -14,6 +14,9 @@ enum UserRole {
 
 registerEnumType(UserRole, { name: 'UserRole' })
 
+/**
+ * User entity
+ */
 @InputType({ isAbstract: true })
 @ObjectType()
 @Entity()

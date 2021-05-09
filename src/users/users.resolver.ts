@@ -13,17 +13,29 @@ import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto'
 export class UsersResolver {
     constructor(private readonly usersService: UsersService) {}
 
+    /**
+     * Тестовый запрос
+     * @access  Public
+     */
     @Query((returns) => Boolean)
     hi(): boolean {
         return true
     }
 
+    /**
+     *  Получение данных о себе
+     *  @access     Private (токен)
+     */
     @Query((returns) => User)
     @UseGuards(AuthGuard)
     me(@AuthUser() authUser: User) {
         return authUser
     }
 
+    /**
+     * Получение пользователя по id
+     * @access      Private (токен)
+     */
     @Query((returns) => UserProfileOutput)
     @UseGuards(AuthGuard)
     async userProfile(@Args() userProfileInput: UserProfileInput): Promise<UserProfileOutput> {
@@ -44,6 +56,11 @@ export class UsersResolver {
         }
     }
 
+    /**
+     * Создания пользователя
+     * @access      private
+     * @mutation    таблица user
+     */
     @Mutation((returns) => CreateAccountOutput)
     async createAccount(
         @Args('input') createAccountInput: CreateAccountInput,
@@ -63,6 +80,11 @@ export class UsersResolver {
         }
     }
 
+    /**
+     * Авторизация с получения токена
+     * @access      private
+     * @mutation    ничего
+     */
     @Mutation((returns) => LoginOutput)
     async login(@Args('input') loginInput: LoginInput): Promise<LoginOutput> {
         try {
