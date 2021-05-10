@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config'
 import { JwtService } from '../jwt/jwt.service'
 import { EditProfileInput } from './dtos/edit-profile.dto'
 import { Verification } from '../common/entities/verification.entity'
+import { VerifyEmailOutput } from './dtos/verify-email.dto'
 
 // отсюда происходит взаимодействие с сервером
 // create, find ...
@@ -130,7 +131,7 @@ export class UsersService {
         return this.users.save(user)
     }
 
-    async verifyEmail(code: string): Promise<boolean> {
+    async verifyEmail(code: string): Promise<VerifyEmailOutput> {
         try {
             const verification = await this.verification.findOne(
                 { code },
@@ -142,11 +143,20 @@ export class UsersService {
             if (verification) {
                 verification.user.verified = true
                 await this.users.save(verification.user)
-                return true
+                await this.verification.delete(verification.id)
+                return {
+                    ok: true,
+                }
             }
-            return false
+            return {
+                ok: false,
+                error: 'Verification not found',
+            }
         } catch (error) {
-            return false
+            return {
+                ok: false,
+                error,
+            }
         }
     }
 }

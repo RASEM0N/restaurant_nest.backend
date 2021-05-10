@@ -9,6 +9,7 @@ import { JwtModule } from './jwt/jwt.module'
 import { JwtMiddleware } from './jwt/jwt.middleware'
 import { AuthModule } from './auth/auth.module'
 import { Verification } from './common/entities/verification.entity'
+import { MailModule } from './mail/mail.module'
 
 @Module({
     imports: [
@@ -29,6 +30,9 @@ import { Verification } from './common/entities/verification.entity'
                 DB_PASSWORD: Joi.string().required(),
                 DB_NAME: Joi.string().required(),
                 SECRET_KEY: Joi.string().required(),
+                MAILGUN_API_KEY: Joi.string().required(),
+                MAILGUN_DOMAIN_NAME: Joi.string().required(),
+                MAILGUN_FROM_EMAIL: Joi.string().required(),
             }),
         }),
         /*
@@ -46,7 +50,7 @@ import { Verification } from './common/entities/verification.entity'
             entities: [
                 // Restaurant
                 User,
-                Verification
+                Verification,
             ],
         }),
         /*
@@ -58,6 +62,11 @@ import { Verification } from './common/entities/verification.entity'
         }),
         JwtModule.foRoot({
             privateKey: process.env.SECRET_KEY,
+        }),
+        MailModule.foRoot({
+            apiKey: process.env.MAILGUN_API_KEY,
+            domain: process.env.MAILGUN_DOMAIN_NAME,
+            fromEmail: process.env.MAILGUN_FROM_EMAIL,
         }),
         // RestaurantsModule,
         UsersModule,
