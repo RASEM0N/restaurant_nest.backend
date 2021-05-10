@@ -9,6 +9,7 @@ import { JwtService } from '../jwt/jwt.service'
 import { EditProfileInput } from './dtos/edit-profile.dto'
 import { Verification } from '../common/entities/verification.entity'
 import { VerifyEmailOutput } from './dtos/verify-email.dto'
+import { MailService } from '../mail/mail.service'
 
 // отсюда происходит взаимодействие с сервером
 // create, find ...
@@ -35,6 +36,7 @@ export class UsersService {
         @InjectRepository(Verification) private readonly verification: Repository<Verification>,
         private readonly config: ConfigService,
         private readonly jwtService: JwtService,
+        private readonly mailService: MailService,
     ) {}
 
     /**
@@ -47,11 +49,12 @@ export class UsersService {
                 return { ok: false, error: 'There is a user with that email already' }
             }
             const user = await this.users.save(this.users.create({ email, password, role }))
-            await this.verification.save(
+            const verification = await this.verification.save(
                 this.verification.create({
                     user: user,
                 }),
             )
+            await this.mailService.sendVerificationEmail(user.email, verification.code)
             return {
                 ok: true,
             }
@@ -116,11 +119,13 @@ export class UsersService {
         if (email) {
             user.email = email
             user.verified = false
-            await this.verification.save(
-                this.verification.create({
-                    user,
-                }),
-            )
+            const verification = await this.verification.findOne({
+                user,
+            })
+            verification.code = ''
+            await this.verification.save(verification)
+            console.log(verification.code)
+            // await this.mailService.sendVerificationEmail(user.email, verification.code)
         }
 
         if (password) user.password = password

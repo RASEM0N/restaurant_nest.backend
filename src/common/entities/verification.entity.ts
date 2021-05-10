@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { BeforeInsert, Column, Entity, JoinColumn, OneToOne } from 'typeorm'
+import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, OneToOne } from 'typeorm'
 import { CoreEntity } from './core.entity'
 import { Field, InputType, ObjectType } from '@nestjs/graphql'
 import { User } from '../../users/entities/users.entity'
@@ -19,7 +19,9 @@ export class Verification extends CoreEntity {
     user: User
 
     @BeforeInsert()
+    @BeforeUpdate()
     createCode(): void {
+        console.log('СЮДА ЗАШЛООООООООООООООООООООООООООООО')
         this.code = uuidv4()
     }
 }
